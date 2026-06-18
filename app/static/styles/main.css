@@ -305,6 +305,42 @@ body {
     background: #d5e0f2;
 }
 
+.travel-map-popup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 180px;
+}
+
+.travel-map-popup-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1d539f;
+}
+
+.travel-map-popup-input {
+    padding: 8px 10px;
+    border: 1px solid #c5d3e8;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: "Roboto", serif;
+}
+
+.travel-map-popup-save {
+    border: none;
+    background: #1d539f;
+    color: white;
+    border-radius: 6px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: "Roboto", serif;
+}
+
+.travel-map-popup-save:hover {
+    background: #16427d;
+}
+
 .profile img {
         border-radius: 50%;
         max-width: 100%;

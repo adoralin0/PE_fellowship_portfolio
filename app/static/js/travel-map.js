@@ -65,6 +65,53 @@ function initTravelMap(container) {
         map.setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM);
     }
 
+    function findPlaceIndex(place) {
+        return places.findIndex(function (p) {
+            return p.lat === place.lat && p.lng === place.lng;
+        });
+    }
+
+    function bindPlacePopup(marker, place) {
+        var popupContent = document.createElement("div");
+        popupContent.className = "travel-map-popup";
+
+        var label = document.createElement("label");
+        label.textContent = "Place name";
+        label.className = "travel-map-popup-label";
+
+        var input = document.createElement("input");
+        input.type = "text";
+        input.value = place.name || "Visited location";
+        input.className = "travel-map-popup-input";
+
+        var saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.textContent = "Save";
+        saveBtn.className = "travel-map-popup-save";
+
+        saveBtn.addEventListener("click", function () {
+            place.name = input.value.trim() || "Visited location";
+            persist();
+            renderMarkers();
+        });
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                saveBtn.click();
+            }
+        });
+
+        popupContent.appendChild(label);
+        popupContent.appendChild(input);
+        popupContent.appendChild(saveBtn);
+        marker.bindPopup(popupContent);
+
+        marker.on("popupopen", function () {
+            input.focus();
+            input.select();
+        });
+    }
+
     function updateList() {
         if (!listEl) {
             return;
@@ -88,9 +135,7 @@ function initTravelMap(container) {
             removeBtn.className = "travel-map-remove";
             removeBtn.textContent = "Remove";
             removeBtn.addEventListener("click", function () {
-                var idx = places.findIndex(function (p) {
-                    return p.lat === place.lat && p.lng === place.lng && p.name === place.name;
-                });
+                var idx = findPlaceIndex(place);
                 if (idx !== -1) {
                     places.splice(idx, 1);
                     persist();
@@ -111,19 +156,7 @@ function initTravelMap(container) {
 
         places.forEach(function (place) {
             var marker = L.marker([place.lat, place.lng], { icon: travelMarkerIcon }).addTo(map);
-            marker.bindPopup(place.name || "Visited");
-
-            marker.on("click", function () {
-                var idx = places.findIndex(function (p) {
-                    return p.lat === place.lat && p.lng === place.lng && p.name === place.name;
-                });
-                if (idx !== -1) {
-                    places.splice(idx, 1);
-                    persist();
-                    renderMarkers();
-                }
-            });
-
+            bindPlacePopup(marker, place);
             markers.push(marker);
         });
 
