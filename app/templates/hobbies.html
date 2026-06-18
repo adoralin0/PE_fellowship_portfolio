@@ -6,11 +6,19 @@
     <h1 class="title">{{ title }}</h1>
 </div>
 
-<section class="container hobbies-grid">
-    {% for hobby in hobbies %}
-        {{ hobby_card(hobby) }}
-    {% else %}
-        <p>No hobbies added yet.</p>
+<div class="team-details">
+    {% for member in team %}
+    <div class="member-column">
+        <h2 class="member-name">{{ member.name }}</h2>
+
+        <section class="member-section hobbies-grid">
+            {% for hobby in member.hobbies %}
+                {{ hobby_card(hobby) }}
+            {% else %}
+                <p>No hobbies added yet.</p>
+            {% endfor %}
+        </section>
+    </div>
     {% endfor %}
-</section>
+</div>
 {% endblock %}

@@ -1,3 +1,12 @@
+{% macro profile_card(member) %}
+<div class="profile-card">
+    <div class="profile-picture">
+        <img src="{{ url_for('static', filename=member.image) }}" alt="{{ member.name }}">
+    </div>
+    <h1>{{ member.name }}</h1>
+</div>
+{% endmacro %}
+
 {% macro experience_card(job) %}
 <div class="card">
     <h3>{{ job.title }} — {{ job.company }}</h3>

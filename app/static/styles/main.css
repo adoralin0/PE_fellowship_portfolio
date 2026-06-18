@@ -117,14 +117,95 @@ body {
 .profile {
     background-color: #1d539f !important;
     text-align: center;
-    height: 320px;
+    min-height: 320px;
     margin-bottom: 50px;
+    padding: 30px 0;
+}
+
+.team {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .profile h1 {
         font-size: 50px;
         font-weight: 700;
         color: white;
+}
+
+.profile-card h1 {
+        font-size: 28px;
+}
+
+.team-details {
+    max-width: 800px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+}
+
+.member-column {
+    margin-bottom: 48px;
+}
+
+.member-name {
+    color: #1d539f;
+    margin-bottom: 16px;
+    border-bottom: 3px solid #1d539f;
+    padding-bottom: 8px;
+}
+
+.member-section {
+    margin-bottom: 24px;
+}
+
+.member-section h3 {
+    color: #1d539f;
+    margin-bottom: 12px;
+}
+
+.tab-nav {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid #1d539f;
+    margin-bottom: 24px;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1d539f;
+    background: transparent;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+}
+
+.tab-button:hover {
+    background: #e8eef7;
+}
+
+.tab-button.active {
+    color: white;
+    background: #1d539f;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
 }
 
 .profile img {

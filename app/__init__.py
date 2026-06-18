@@ -5,33 +5,62 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 
-work_experiences = [
+team = [
     {
-        "title": "Software Intern",
-        "company": "Example Corp",
-        "dates": "Summer 2024",
-        "description": "Built internal tools with Python and Flask.",
+        "name": "Member One",
+        "image": "img/logo.jpg",
+        "about": "Write a short bio about yourself here.",
+        "work_experiences": [
+            {
+                "title": "Software Intern",
+                "company": "Example Corp",
+                "dates": "Summer 2024",
+                "description": "Built internal tools with Python and Flask.",
+            },
+        ],
+        "education": [
+            {
+                "school": "My University",
+                "degree": "B.S. Computer Science",
+                "dates": "2022 - Present",
+            },
+        ],
+        "hobbies": [
+            {"name": "Photography"},
+            {"name": "Hiking"},
+        ],
     },
     {
-        "title": "Teaching Assistant",
-        "company": "My University",
-        "dates": "2023 - Present",
-        "description": "Helped students with computer science coursework.",
+        "name": "Member Two",
+        "image": "img/logo.jpg",
+        "about": "Write a short bio about yourself here.",
+        "work_experiences": [
+            {
+                "title": "Teaching Assistant",
+                "company": "My University",
+                "dates": "2023 - Present",
+                "description": "Helped students with computer science coursework.",
+            },
+        ],
+        "education": [
+            {
+                "school": "My University",
+                "degree": "B.S. Computer Science",
+                "dates": "2022 - Present",
+            },
+        ],
+        "hobbies": [
+            {"name": "Reading"},
+        ],
     },
-]
-
-education = [
     {
-        "school": "My University",
-        "degree": "B.S. Computer Science",
-        "dates": "2022 - Present",
+        "name": "Member Three",
+        "image": "img/logo.jpg",
+        "about": "Write a short bio about yourself here.",
+        "work_experiences": [],
+        "education": [],
+        "hobbies": [],
     },
-]
-
-hobbies = [
-    {"name": "Photography"},
-    {"name": "Hiking"},
-    {"name": "Reading"},
 ]
 
 pages = [
@@ -46,8 +75,7 @@ def index():
         "index.html",
         title="MLH Fellow",
         url=os.getenv("URL"),
-        work_experiences=work_experiences,
-        education=education,
+        team=team,
         pages=pages,
     )
 
@@ -58,6 +86,6 @@ def hobbies_page():
         "hobbies.html",
         title="My Hobbies",
         url=os.getenv("URL"),
-        hobbies=hobbies,
+        team=team,
         pages=pages,
     )

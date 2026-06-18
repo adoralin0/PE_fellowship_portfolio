@@ -1,29 +1,67 @@
 {% extends "base.html" %}
-{% from "macros.html" import experience_card, education_card %}
+{% from "macros.html" import profile_card, experience_card, education_card %}
 
 {% block content %}
 <div class="profile">
-    <div id="profile-picture" class="profile-picture">
-        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Profile photo">
+    <div class="team">
+        {% for member in team %}
+            {{ profile_card(member) }}
+        {% endfor %}
     </div>
-    <h1>{{ title }}</h1>
 </div>
 
-<section class="container">
-    <h2>Work Experience</h2>
-    {% for job in work_experiences %}
-        {{ experience_card(job) }}
-    {% else %}
-        <p>No work experience added yet.</p>
-    {% endfor %}
-</section>
+<div class="team-details">
+    <div class="tab-nav">
+        {% for member in team %}
+        <button class="tab-button{% if loop.first %} active{% endif %}" data-tab="member-{{ loop.index }}">
+            {{ member.name }}
+        </button>
+        {% endfor %}
+    </div>
 
-<section class="container">
-    <h2>Education</h2>
-    {% for school in education %}
-        {{ education_card(school) }}
-    {% else %}
-        <p>No education added yet.</p>
+    {% for member in team %}
+    <div class="tab-panel member-column{% if loop.first %} active{% endif %}" id="member-{{ loop.index }}">
+        <section class="member-section">
+            <h3>About Me</h3>
+            <p>{{ member.about }}</p>
+        </section>
+
+        <section class="member-section">
+            <h3>Work Experience</h3>
+            {% for job in member.work_experiences %}
+                {{ experience_card(job) }}
+            {% else %}
+                <p>No work experience added yet.</p>
+            {% endfor %}
+        </section>
+
+        <section class="member-section">
+            <h3>Education</h3>
+            {% for school in member.education %}
+                {{ education_card(school) }}
+            {% else %}
+                <p>No education added yet.</p>
+            {% endfor %}
+        </section>
+    </div>
     {% endfor %}
-</section>
+</div>
+
+<script>
+    document.querySelectorAll(".tab-button").forEach(function (button) {
+        button.addEventListener("click", function () {
+            var target = button.getAttribute("data-tab");
+
+            document.querySelectorAll(".tab-button").forEach(function (b) {
+                b.classList.remove("active");
+            });
+            document.querySelectorAll(".tab-panel").forEach(function (panel) {
+                panel.classList.remove("active");
+            });
+
+            button.classList.add("active");
+            document.getElementById(target).classList.add("active");
+        });
+    });
+</script>
 {% endblock %}
