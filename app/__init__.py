@@ -26,8 +26,8 @@ team = [
             },
         ],
         "hobbies": [
-            {"name": "Photography"},
-            {"name": "Hiking"},
+            {"name": "Photography", "image": "img/logo.jpg"},
+            {"name": "Hiking", "image": "img/logo.jpg"},
         ],
     },
     {
@@ -50,7 +50,7 @@ team = [
             },
         ],
         "hobbies": [
-            {"name": "Reading"},
+            {"name": "Reading", "image": "img/logo.jpg"},
         ],
     },
     {

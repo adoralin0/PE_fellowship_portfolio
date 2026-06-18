@@ -25,6 +25,12 @@
 
 {% macro hobby_card(hobby) %}
 <div class="hobby-card">
-    <h3>{{ hobby.name }}</h3>
+    <button class="hobby-bar" type="button">
+        <span>{{ hobby.name }}</span>
+        <span class="hobby-arrow">▾</span>
+    </button>
+    <div class="hobby-content">
+        <img src="{{ url_for('static', filename=hobby.image) }}" alt="{{ hobby.name }}">
+    </div>
 </div>
 {% endmacro %}

@@ -11,7 +11,7 @@
     <div class="member-column">
         <h2 class="member-name">{{ member.name }}</h2>
 
-        <section class="member-section hobbies-grid">
+        <section class="member-section hobbies-list">
             {% for hobby in member.hobbies %}
                 {{ hobby_card(hobby) }}
             {% else %}
@@ -21,4 +21,12 @@
     </div>
     {% endfor %}
 </div>
+
+<script>
+    document.querySelectorAll(".hobby-bar").forEach(function (bar) {
+        bar.addEventListener("click", function () {
+            bar.parentElement.classList.toggle("open");
+        });
+    });
+</script>
 {% endblock %}
