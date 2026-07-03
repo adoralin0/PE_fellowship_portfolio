@@ -5,7 +5,7 @@ member = {
         "I'm Adora, an incoming junior at the University of Florida pursuing a B.S. in "
         "Computer Science with a minor in Digital Arts & Sciences (graduating "
         "May 2028). I'm interested in UX/UI design, web development, and "
-        "software engineering!"
+        "software engineering! I also love cats!"
     ),
     "work_experiences": [
         {
