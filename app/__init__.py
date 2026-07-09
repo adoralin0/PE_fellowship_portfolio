@@ -63,6 +63,7 @@ member = {
 pages = [
     {"endpoint": "index", "name": "Home", "url": "/"},
     {"endpoint": "hobbies", "name": "Hobbies", "url": "/hobbies"},
+    {"endpoint": "timeline", "name": "Timeline", "url": "/timeline"},
 ]
 
 mydb = MySQLDatabase(
@@ -119,8 +120,13 @@ def delete_time_line_post(post_id):
 
 @app.route('/timeline')
 def timeline():
-    logger.info("Serving timeline page")
-    return render_template("timeline.html", title="Timeline")
+    return render_template(
+        "timeline.html",
+        title="Timeline",
+        url=os.getenv("URL"),
+        member=member,
+        pages=pages,
+    )
 
 @app.route("/")
 def index():
@@ -142,3 +148,4 @@ def hobbies_page():
         member=member,
         pages=pages,
     )
+

@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    .timeline-page {
+        max-width: 720px;
+        margin: 0 auto 48px;
+        padding: 0 20px;
+    }
+
+    .timeline-form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .timeline-form-card h2 {
+        color: #1d539f;
+        margin: 0 0 20px;
+        font-size: 1.25rem;
+    }
+
+    .timeline-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .timeline-form label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .timeline-form input,
+    .timeline-form textarea {
+        padding: 12px 14px;
+        border: 1px solid #c5d3e8;
+        border-radius: 8px;
+        font-size: 15px;
+        font-family: "Roboto", serif;
+        transition: border-color 0.2s;
+    }
+
+    .timeline-form input:focus,
+    .timeline-form textarea:focus {
+        outline: none;
+        border-color: #1d539f;
+        box-shadow: 0 0 0 3px rgba(29, 83, 159, 0.12);
+    }
+
+    .timeline-form textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .timeline-submit {
+        align-self: flex-start;
+        background: #1d539f;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: "Roboto", serif;
+    }
+
+    .timeline-submit:hover {
+        background: #16427d;
+    }
+
+    .timeline-submit:disabled {
+        background: #8fa8cc;
+        cursor: not-allowed;
+    }
+
+    .timeline-error {
+        color: #c0392b;
+        font-size: 14px;
+        margin: 0;
+        display: none;
+    }
+
+    .timeline-error.visible {
+        display: block;
+    }
+
+    .timeline-posts-heading {
+        color: #1d539f;
+        margin: 0 0 16px;
+        font-size: 1.25rem;
+    }
+
+    .timeline-posts {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .timeline-post {
+        display: flex;
+        gap: 16px;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .timeline-post-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        object-fit: cover;
+        background: #e8eef7;
+    }
+
+    .timeline-post-body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .timeline-post-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .timeline-post-name {
+        font-weight: 700;
+        color: #1d539f;
+        font-size: 16px;
+    }
+
+    .timeline-post-email {
+        color: #888;
+        font-size: 13px;
+    }
+
+    .timeline-post-date {
+        color: #aaa;
+        font-size: 12px;
+        margin-left: auto;
+    }
+
+    .timeline-post-content {
+        margin: 0;
+        color: #333;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .timeline-empty {
+        text-align: center;
+        color: #888;
+        font-style: italic;
+        padding: 32px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="banner">
+    <h1 class="title">{{ title }}</h1>
+</div>
+
+<div class="team-details">
+    <div class="tab-nav single-member">
+        <a href="{{ url_for('index') }}" class="tab-button tab-link">{{ member.name }}</a>
+        <span class="tab-button active">Timeline</span>
+    </div>
+</div>
+
+<div class="timeline-page">
+    <div class="timeline-form-card">
+        <h2>Share an update</h2>
+        <form class="timeline-form" id="timeline-form">
+            <label>
+                Name
+                <input type="text" name="name" id="name" required placeholder="Your name">
+            </label>
+            <label>
+                Email
+                <input type="email" name="email" id="email" required placeholder="you@example.com">
+            </label>
+            <label>
+                Message
+                <textarea name="content" id="content" required placeholder="What's on your mind?"></textarea>
+            </label>
+            <p class="timeline-error" id="form-error"></p>
+            <button type="submit" class="timeline-submit" id="submit-btn">Post</button>
+        </form>
+    </div>
+
+    <h2 class="timeline-posts-heading">Recent posts</h2>
+    <div class="timeline-posts" id="timeline-posts">
+        <p class="timeline-empty">Loading posts...</p>
+    </div>
+</div>
+
+<script>
+    const API_URL = "/api/timeline_post";
+    const postsContainer = document.getElementById("timeline-posts");
+    const form = document.getElementById("timeline-form");
+    const formError = document.getElementById("form-error");
+    const submitBtn = document.getElementById("submit-btn");
+
+    function md5(string) {
+        function rotateLeft(value, shift) {
+            return (value << shift) | (value >>> (32 - shift));
+        }
+
+        function addUnsigned(x, y) {
+            const x8 = x & 0x80000000;
+            const y8 = y & 0x80000000;
+            const x4 = x & 0x40000000;
+            const y4 = y & 0x40000000;
+            const result = (x & 0x3fffffff) + (y & 0x3fffffff);
+            if (x4 & y4) return result ^ 0x80000000 ^ x8 ^ y8;
+            if (x4 | y4) {
+                if (result & 0x40000000) return result ^ 0xc0000000 ^ x8 ^ y8;
+                return result ^ 0x40000000 ^ x8 ^ y8;
+            }
+            return result ^ x8 ^ y8;
+        }
+
+        function f(x, y, z) { return (x & y) | (~x & z); }
+        function g(x, y, z) { return (x & z) | (y & ~z); }
+        function h(x, y, z) { return x ^ y ^ z; }
+        function i(x, y, z) { return y ^ (x | ~z); }
+
+        function ff(a, b, c, d, x, s, ac) {
+            a = addUnsigned(a, addUnsigned(addUnsigned(f(b, c, d), x), ac));
+            return addUnsigned(rotateLeft(a, s), b);
+        }
+        function gg(a, b, c, d, x, s, ac) {
+            a = addUnsigned(a, addUnsigned(addUnsigned(g(b, c, d), x), ac));
+            return addUnsigned(rotateLeft(a, s), b);
+        }
+        function hh(a, b, c, d, x, s, ac) {
+            a = addUnsigned(a, addUnsigned(addUnsigned(h(b, c, d), x), ac));
+            return addUnsigned(rotateLeft(a, s), b);
+        }
+        function ii(a, b, c, d, x, s, ac) {
+            a = addUnsigned(a, addUnsigned(addUnsigned(i(b, c, d), x), ac));
+            return addUnsigned(rotateLeft(a, s), b);
+        }
+
+        function convertToWordArray(str) {
+            const wordArray = [];
+            for (let i = 0; i < str.length * 8; i += 8) {
+                wordArray[i >> 5] |= (str.charCodeAt(i / 8) & 0xff) << (i % 32);
+            }
+            return wordArray;
+        }
+
+        function wordToHex(value) {
+            let hex = "";
+            for (let i = 0; i <= 3; i++) {
+                const byte = (value >>> (i * 8)) & 255;
+                hex += ("0" + byte.toString(16)).slice(-2);
+            }
+            return hex;
+        }
+
+        const x = convertToWordArray(string);
+        let a = 0x67452301;
+        let b = 0xefcdab89;
+        let c = 0x98badcfe;
+        let d = 0x10325476;
+
+        x[string.length * 8 >> 5] |= 0x80 << (string.length * 8 % 32);
+        x[(((string.length * 8 + 64) >>> 9) << 4) + 14] = string.length * 8;
+
+        for (let k = 0; k < x.length; k += 16) {
+            const aa = a, bb = b, cc = c, dd = d;
+            a = ff(a, b, c, d, x[k], 7, 0xd76aa478);
+            d = ff(d, a, b, c, x[k + 1], 12, 0xe8c7b756);
+            c = ff(c, d, a, b, x[k + 2], 17, 0x242070db);
+            b = ff(b, c, d, a, x[k + 3], 22, 0xc1bdceee);
+            a = ff(a, b, c, d, x[k + 4], 7, 0xf57c0faf);
+            d = ff(d, a, b, c, x[k + 5], 12, 0x4787c62a);
+            c = ff(c, d, a, b, x[k + 6], 17, 0xa8304613);
+            b = ff(b, c, d, a, x[k + 7], 22, 0xfd469501);
+            a = ff(a, b, c, d, x[k + 8], 7, 0x698098d8);
+            d = ff(d, a, b, c, x[k + 9], 12, 0x8b44f7af);
+            c = ff(c, d, a, b, x[k + 10], 17, 0xffff5bb1);
+            b = ff(b, c, d, a, x[k + 11], 22, 0x895cd7be);
+            a = ff(a, b, c, d, x[k + 12], 7, 0x6b901122);
+            d = ff(d, a, b, c, x[k + 13], 12, 0xfd987193);
+            c = ff(c, d, a, b, x[k + 14], 17, 0xa679438e);
+            b = ff(b, c, d, a, x[k + 15], 22, 0x49b40821);
+            a = gg(a, b, c, d, x[k + 1], 5, 0xf61e2562);
+            d = gg(d, a, b, c, x[k + 6], 9, 0xc040b340);
+            c = gg(c, d, a, b, x[k + 11], 14, 0x265e5a51);
+            b = gg(b, c, d, a, x[k], 20, 0xe9b6c7aa);
+            a = gg(a, b, c, d, x[k + 5], 5, 0xd62f105d);
+            d = gg(d, a, b, c, x[k + 10], 9, 0x02441453);
+            c = gg(c, d, a, b, x[k + 15], 14, 0xd8a1e681);
+            b = gg(b, c, d, a, x[k + 4], 20, 0xe7d3fbc8);
+            a = gg(a, b, c, d, x[k + 9], 5, 0x21e1cde6);
+            d = gg(d, a, b, c, x[k + 14], 9, 0xc33707d6);
+            c = gg(c, d, a, b, x[k + 3], 14, 0xf4d50d87);
+            b = gg(b, c, d, a, x[k + 8], 20, 0x455a14ed);
+            a = gg(a, b, c, d, x[k + 13], 5, 0xa9e3e905);
+            d = gg(d, a, b, c, x[k + 2], 9, 0xfcefa3f8);
+            c = gg(c, d, a, b, x[k + 7], 14, 0x676f02d9);
+            b = gg(b, c, d, a, x[k + 12], 20, 0x8d2a4c8a);
+            a = hh(a, b, c, d, x[k + 5], 4, 0xfffa3942);
+            d = hh(d, a, b, c, x[k + 8], 11, 0x8771f681);
+            c = hh(c, d, a, b, x[k + 11], 16, 0x6d9d6122);
+            b = hh(b, c, d, a, x[k + 14], 23, 0xfde5380c);
+            a = hh(a, b, c, d, x[k + 1], 4, 0xa4beea44);
+            d = hh(d, a, b, c, x[k + 4], 11, 0x4bdecfa9);
+            c = hh(c, d, a, b, x[k + 7], 16, 0xf6bb4b60);
+            b = hh(b, c, d, a, x[k + 10], 23, 0xbebfbc70);
+            a = hh(a, b, c, d, x[k + 13], 4, 0x289b7ec6);
+            d = hh(d, a, b, c, x[k], 11, 0xeaa127fa);
+            c = hh(c, d, a, b, x[k + 3], 16, 0xd4ef3085);
+            b = hh(b, c, d, a, x[k + 6], 23, 0x04881d05);
+            a = hh(a, b, c, d, x[k + 9], 4, 0xd9d4d039);
+            d = hh(d, a, b, c, x[k + 12], 11, 0xe6db99e5);
+            c = hh(c, d, a, b, x[k + 15], 16, 0x1fa27cf8);
+            b = hh(b, c, d, a, x[k + 2], 23, 0xc4ac5665);
+            a = ii(a, b, c, d, x[k], 6, 0xf4292244);
+            d = ii(d, a, b, c, x[k + 7], 10, 0x432aff97);
+            c = ii(c, d, a, b, x[k + 14], 15, 0xab9423a7);
+            b = ii(b, c, d, a, x[k + 5], 21, 0xfc93a039);
+            a = ii(a, b, c, d, x[k + 12], 6, 0x655b59c3);
+            d = ii(d, a, b, c, x[k + 3], 10, 0x8f0ccc92);
+            c = ii(c, d, a, b, x[k + 10], 15, 0xffeff47d);
+            b = ii(b, c, d, a, x[k + 1], 21, 0x85845dd1);
+            a = ii(a, b, c, d, x[k + 8], 6, 0x6fa87e4f);
+            d = ii(d, a, b, c, x[k + 15], 10, 0xfe2ce6e0);
+            c = ii(c, d, a, b, x[k + 6], 15, 0xa3014314);
+            b = ii(b, c, d, a, x[k + 13], 21, 0x4e0811a1);
+            a = ii(a, b, c, d, x[k + 4], 6, 0xf7537e82);
+            d = ii(d, a, b, c, x[k + 11], 10, 0xbd3af235);
+            c = ii(c, d, a, b, x[k + 2], 15, 0x2ad7d2bb);
+            b = ii(b, c, d, a, x[k + 9], 21, 0xeb86d391);
+            a = addUnsigned(a, aa);
+            b = addUnsigned(b, bb);
+            c = addUnsigned(c, cc);
+            d = addUnsigned(d, dd);
+        }
+
+        return (wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d)).toLowerCase();
+    }
+
+    function gravatarUrl(email) {
+        const hash = md5(email.trim().toLowerCase());
+        return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=112`;
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        if (Number.isNaN(date.getTime())) return dateStr;
+        return date.toLocaleString(undefined, {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+        });
+    }
+
+    function createPostElement(post) {
+        const article = document.createElement("article");
+        article.className = "timeline-post";
+        article.dataset.postId = post.id;
+
+        const avatar = document.createElement("img");
+        avatar.className = "timeline-post-avatar";
+        avatar.src = gravatarUrl(post.email);
+        avatar.alt = post.name;
+        avatar.loading = "lazy";
+
+        const body = document.createElement("div");
+        body.className = "timeline-post-body";
+
+        const header = document.createElement("div");
+        header.className = "timeline-post-header";
+
+        const name = document.createElement("span");
+        name.className = "timeline-post-name";
+        name.textContent = post.name;
+
+        const email = document.createElement("span");
+        email.className = "timeline-post-email";
+        email.textContent = post.email;
+
+        const date = document.createElement("span");
+        date.className = "timeline-post-date";
+        date.textContent = formatDate(post.created_at);
+
+        const content = document.createElement("p");
+        content.className = "timeline-post-content";
+        content.textContent = post.content;
+
+        header.appendChild(name);
+        header.appendChild(email);
+        header.appendChild(date);
+        body.appendChild(header);
+        body.appendChild(content);
+        article.appendChild(avatar);
+        article.appendChild(body);
+
+        return article;
+    }
+
+    function renderPosts(posts) {
+        postsContainer.innerHTML = "";
+
+        if (!posts.length) {
+            postsContainer.innerHTML = '<p class="timeline-empty">No posts yet. Be the first to share something!</p>';
+            return;
+        }
+
+        posts.forEach(function (post) {
+            postsContainer.appendChild(createPostElement(post));
+        });
+    }
+
+    async function loadPosts() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error("Failed to load posts");
+            const data = await response.json();
+            renderPosts(data.timeline_posts || []);
+        } catch (err) {
+            postsContainer.innerHTML = '<p class="timeline-empty">Could not load posts. Please try again later.</p>';
+        }
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        formError.classList.remove("visible");
+        submitBtn.disabled = true;
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error("Failed to create post");
+
+            const newPost = await response.json();
+            const emptyMessage = postsContainer.querySelector(".timeline-empty");
+            if (emptyMessage) {
+                postsContainer.innerHTML = "";
+            }
+
+            postsContainer.prepend(createPostElement(newPost));
+            form.reset();
+        } catch (err) {
+            formError.textContent = "Something went wrong. Please try again.";
+            formError.classList.add("visible");
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+
+    loadPosts();
+</script>
+{% endblock %}
