@@ -8,23 +8,18 @@
 {% block content %}
 <div class="profile">
     <div class="team">
-        {% for member in team %}
-            {{ profile_card(member) }}
-        {% endfor %}
+        {{ profile_card(member) }}
     </div>
 </div>
 
 <div class="team-details">
-    <div class="tab-nav">
-        {% for member in team %}
-        <button class="tab-button{% if loop.first %} active{% endif %}" data-tab="member-{{ loop.index }}">
+    <div class="tab-nav single-member">
+        <button class="tab-button active" data-tab="member-1" type="button">
             {{ member.name }}
         </button>
-        {% endfor %}
     </div>
 
-    {% for member in team %}
-    <div class="tab-panel member-column{% if loop.first %} active{% endif %}" id="member-{{ loop.index }}">
+    <div class="tab-panel member-column active" id="member-1">
         <section class="member-section">
             <h3>About Me</h3>
             <p>{{ member.about }}</p>
@@ -53,15 +48,14 @@
             <p class="map-hint">Click the map to add a place. Click a pin to edit its name, or use Remove to delete it.</p>
             <div
                 class="travel-map"
-                id="travel-map-{{ loop.index }}"
-                data-member-id="{{ loop.index }}"
+                id="travel-map-1"
+                data-member-id="1"
                 data-marker-icon="{{ url_for('static', filename='img/marker-pin.svg') }}"
                 data-places='{{ member.visited_places | default([], true) | tojson }}'
             ></div>
-            <ul class="travel-map-list" id="travel-map-list-{{ loop.index }}"></ul>
+            <ul class="travel-map-list" id="travel-map-list-1"></ul>
         </section>
     </div>
-    {% endfor %}
 </div>
 
 <script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
@@ -73,33 +67,6 @@
         }
 
         initTravelMaps();
-
-        document.querySelectorAll(".tab-button").forEach(function (button) {
-            button.addEventListener("click", function () {
-                var target = button.getAttribute("data-tab");
-
-                document.querySelectorAll(".tab-button").forEach(function (b) {
-                    b.classList.remove("active");
-                });
-                document.querySelectorAll(".tab-panel").forEach(function (panel) {
-                    panel.classList.remove("active");
-                });
-
-                button.classList.add("active");
-                document.getElementById(target).classList.add("active");
-
-                var memberId = target.replace("member-", "");
-                var mapContainer = document.getElementById("travel-map-" + memberId);
-                if (mapContainer && typeof initTravelMapIfNeeded === "function") {
-                    initTravelMapIfNeeded(mapContainer);
-                }
-                if (typeof resizeTravelMap === "function") {
-                    setTimeout(function () {
-                        resizeTravelMap(memberId);
-                    }, 100);
-                }
-            });
-        });
     }
 
     if (document.readyState === "loading") {
