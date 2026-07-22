@@ -77,7 +77,8 @@ pages = [
 ]
 
 if os.getenv("TESTING") == "true":
-    mydb = SqliteDatabase(":memory:")
+    print("Running in test mode")
+    mydb = SqliteDatabase('file:memory?mode=memory&cache=shared', uri=True)
 else:
     mydb = MySQLDatabase(
         os.getenv("MYSQL_DATABASE"),
@@ -86,6 +87,7 @@ else:
         host=os.getenv("MYSQL_HOST"),
         port=3306,
     )
+
 
 class TimelinePost(Model):
     name = CharField()
